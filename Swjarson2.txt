@@ -1,0 +1,24 @@
+{
+  "constellations":[
+    {
+      "name":"Ursa Major",
+      "stars":["Dubhe","Merak","Phecda","Megrez","Alioth","Mizar","Alkaid"]
+    },
+    {
+      "name":"Cassiopeia",
+      "stars":["Schedar","Caph","Gamma Cassiopeiae","Ruchbah","Segin"]
+    },
+    {
+      "name":"Orion",
+      "stars":["Betelgeuse","Rigel","Bellatrix","Mintaka","Alnilam","Alnitak"]
+    }
+  ],
+  "referenceStars":[
+    "Polaris",
+    "Vega",
+    "Deneb",
+    "Altair",
+    "Betelgeuse",
+    "Rigel"
+  ]
+}
