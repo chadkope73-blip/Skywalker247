@@ -106,7 +106,7 @@ align-items:center;
 justify-content:center;
 }
 
-/* VIDEO */
+/* VIDEO LAYER */
 
 .camera-shell video{
 position:absolute;
@@ -115,6 +115,7 @@ left:0;
 width:100%;
 height:100%;
 object-fit:cover;
+z-index:1;
 }
 
 /* SKY GRID */
@@ -124,6 +125,7 @@ position:absolute;
 width:100%;
 height:100%;
 pointer-events:none;
+z-index:2;
 }
 
 /* NORTH ARROW */
@@ -135,6 +137,7 @@ left:50%;
 transform:translateX(-50%);
 text-align:center;
 pointer-events:none;
+z-index:3;
 }
 
 #northArrow{
