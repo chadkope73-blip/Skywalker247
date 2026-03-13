@@ -1,24 +1,218 @@
 {
-  "constellations":[
+  "meta": {
+    "name": "Skywalker247 Celestial Reference Pack",
+    "version": "1.0.0",
+    "hemisphere": "northern",
+    "notes": [
+      "Reference data for constellation naming, Polaris lock guidance, and celestial solve scaffolding.",
+      "Right ascension is stored in decimal hours. Declination is stored in decimal degrees.",
+      "This dataset is intentionally compact for offline use."
+    ]
+  },
+  "referenceStars": [
     {
-      "name":"Ursa Major",
-      "stars":["Dubhe","Merak","Phecda","Megrez","Alioth","Mizar","Alkaid"]
+      "name": "Polaris",
+      "constellation": "Ursa Minor",
+      "raHours": 2.5303,
+      "decDeg": 89.2641,
+      "mag": 1.98,
+      "role": "north_reference"
     },
     {
-      "name":"Cassiopeia",
-      "stars":["Schedar","Caph","Gamma Cassiopeiae","Ruchbah","Segin"]
+      "name": "Dubhe",
+      "constellation": "Ursa Major",
+      "raHours": 11.0621,
+      "decDeg": 61.7510,
+      "mag": 1.79,
+      "role": "pointer_star"
     },
     {
-      "name":"Orion",
-      "stars":["Betelgeuse","Rigel","Bellatrix","Mintaka","Alnilam","Alnitak"]
+      "name": "Merak",
+      "constellation": "Ursa Major",
+      "raHours": 11.0307,
+      "decDeg": 56.3824,
+      "mag": 2.37,
+      "role": "pointer_star"
+    },
+    {
+      "name": "Schedar",
+      "constellation": "Cassiopeia",
+      "raHours": 0.6751,
+      "decDeg": 56.5373,
+      "mag": 2.24,
+      "role": "north_side_reference"
+    },
+    {
+      "name": "Caph",
+      "constellation": "Cassiopeia",
+      "raHours": 0.1529,
+      "decDeg": 59.1498,
+      "mag": 2.28,
+      "role": "north_side_reference"
+    },
+    {
+      "name": "Betelgeuse",
+      "constellation": "Orion",
+      "raHours": 5.9195,
+      "decDeg": 7.4071,
+      "mag": 0.42,
+      "role": "seasonal_reference"
+    },
+    {
+      "name": "Rigel",
+      "constellation": "Orion",
+      "raHours": 5.2423,
+      "decDeg": -8.2016,
+      "mag": 0.13,
+      "role": "seasonal_reference"
+    },
+    {
+      "name": "Vega",
+      "constellation": "Lyra",
+      "raHours": 18.6156,
+      "decDeg": 38.7837,
+      "mag": 0.03,
+      "role": "summer_reference"
+    },
+    {
+      "name": "Deneb",
+      "constellation": "Cygnus",
+      "raHours": 20.6905,
+      "decDeg": 45.2803,
+      "mag": 1.25,
+      "role": "summer_reference"
+    },
+    {
+      "name": "Altair",
+      "constellation": "Aquila",
+      "raHours": 19.8464,
+      "decDeg": 8.8683,
+      "mag": 0.77,
+      "role": "summer_reference"
+    },
+    {
+      "name": "Capella",
+      "constellation": "Auriga",
+      "raHours": 5.2782,
+      "decDeg": 45.9980,
+      "mag": 0.08,
+      "role": "winter_reference"
+    },
+    {
+      "name": "Aldebaran",
+      "constellation": "Taurus",
+      "raHours": 4.5987,
+      "decDeg": 16.5093,
+      "mag": 0.85,
+      "role": "winter_reference"
+    },
+    {
+      "name": "Arcturus",
+      "constellation": "Boötes",
+      "raHours": 14.2610,
+      "decDeg": 19.1825,
+      "mag": -0.05,
+      "role": "spring_reference"
+    },
+    {
+      "name": "Spica",
+      "constellation": "Virgo",
+      "raHours": 13.4199,
+      "decDeg": -11.1614,
+      "mag": 0.98,
+      "role": "spring_reference"
+    },
+    {
+      "name": "Antares",
+      "constellation": "Scorpius",
+      "raHours": 16.4901,
+      "decDeg": -26.4319,
+      "mag": 1.06,
+      "role": "southern_reference"
+    },
+    {
+      "name": "Fomalhaut",
+      "constellation": "Piscis Austrinus",
+      "raHours": 22.9608,
+      "decDeg": -29.6222,
+      "mag": 1.16,
+      "role": "autumn_reference"
     }
   ],
-  "referenceStars":[
-    "Polaris",
-    "Vega",
-    "Deneb",
-    "Altair",
-    "Betelgeuse",
-    "Rigel"
-  ]
+  "constellations": [
+    {
+      "name": "Ursa Major",
+      "commonName": "Big Dipper",
+      "type": "asterism_reference",
+      "stars": ["Dubhe", "Merak", "Phecda", "Megrez", "Alioth", "Mizar", "Alkaid"],
+      "use": "Pointer stars Dubhe and Merak help estimate Polaris and celestial north."
+    },
+    {
+      "name": "Cassiopeia",
+      "commonName": "Cassiopeia",
+      "type": "north_reference",
+      "stars": ["Schedar", "Caph", "Gamma Cassiopeiae", "Ruchbah", "Segin"],
+      "use": "W-shape opposite the Big Dipper around Polaris; useful when the Dipper is low."
+    },
+    {
+      "name": "Orion",
+      "commonName": "Orion",
+      "type": "seasonal_reference",
+      "stars": ["Betelgeuse", "Bellatrix", "Mintaka", "Alnilam", "Alnitak", "Saiph", "Rigel"],
+      "use": "Strong winter constellation and easy seasonal sky anchor."
+    },
+    {
+      "name": "Cygnus",
+      "commonName": "Northern Cross",
+      "type": "seasonal_reference",
+      "stars": ["Deneb", "Sadr", "Albireo"],
+      "use": "Useful summer sky orientation marker."
+    },
+    {
+      "name": "Lyra",
+      "commonName": "Lyra",
+      "type": "seasonal_reference",
+      "stars": ["Vega", "Sheliak", "Sulafat"],
+      "use": "Compact summer constellation built around bright Vega."
+    },
+    {
+      "name": "Aquila",
+      "commonName": "Aquila",
+      "type": "seasonal_reference",
+      "stars": ["Altair", "Tarazed", "Alshain"],
+      "use": "Part of the Summer Triangle."
+    },
+    {
+      "name": "Taurus",
+      "commonName": "Taurus",
+      "type": "seasonal_reference",
+      "stars": ["Aldebaran", "Elnath"],
+      "use": "Winter sky reference near Orion."
+    }
+  ],
+  "polarisGuidance": {
+    "northernHemisphereOnly": true,
+    "method": "Use Dubhe and Merak in Ursa Major to point toward Polaris. Cassiopeia provides supporting north-side reference.",
+    "latitudeRule": "Approximate observer latitude is close to Polaris altitude above horizon in the northern hemisphere."
+  },
+  "solveModes": {
+    "timeFromSky": {
+      "description": "Use known location plus observed sky reference to estimate time.",
+      "requiredInputs": ["date", "latitude", "longitude"],
+      "optionalInputs": ["zip"],
+      "outputs": ["skyTimeEstimate", "constellationMatch", "polarisLock", "solveConfidence"]
+    },
+    "locationFromSky": {
+      "description": "Use known time plus observed sky reference to estimate approximate latitude/longitude band.",
+      "requiredInputs": ["date", "knownTime"],
+      "optionalInputs": ["referenceConstellation"],
+      "outputs": ["estimatedLocation", "constellationMatch", "polarisLock", "solveConfidence"]
+    },
+    "referenceOnly": {
+      "description": "Use the sky as a celestial reference for north and constellation identification.",
+      "requiredInputs": [],
+      "optionalInputs": ["date"],
+      "outputs": ["celestialNorth", "constellationMatch", "solveConfidence"]
+    }
+  }
 }
