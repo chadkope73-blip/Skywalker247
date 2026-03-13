@@ -13,12 +13,11 @@
 
 <link rel="icon" href="logo.png">
 
-<!-- PWA Support -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- Optional scripts -->
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="app.js"></script>
 
@@ -114,6 +113,7 @@ margin-bottom:8px;
 }
 
 .camera-shell{
+position:relative;
 width:100%;
 aspect-ratio:16/10;
 border-radius:20px;
@@ -123,6 +123,30 @@ background:black;
 display:flex;
 align-items:center;
 justify-content:center;
+}
+
+/* NORTH OVERLAY */
+
+#northOverlay{
+position:absolute;
+top:10px;
+left:50%;
+transform:translateX(-50%);
+text-align:center;
+pointer-events:none;
+}
+
+#northArrow{
+font-size:34px;
+color:#ffd98a;
+text-shadow:0 0 10px rgba(0,0,0,.7);
+transition:transform .1s linear;
+}
+
+#northLabel{
+font-size:12px;
+color:#ffd98a;
+margin-top:2px;
 }
 
 .controls{
@@ -205,7 +229,14 @@ Identify constellations, estimate celestial orientation, and compare the sky wit
 <div class="section-title">Sky View</div>
 
 <div class="camera-shell" id="cameraView">
+
+<div id="northOverlay">
+<div id="northArrow">▲</div>
+<div id="northLabel">True North</div>
+</div>
+
 Tap Start Sky Scan
+
 </div>
 
 <div class="controls">
@@ -349,6 +380,33 @@ document.getElementById("gnssCompare").innerText="Agreement Good"
 },1200)
 
 }
+
+
+/* TRUE NORTH ROTATION */
+
+const northArrow = document.getElementById("northArrow")
+
+window.addEventListener("deviceorientation", event=>{
+
+let heading
+
+if(event.webkitCompassHeading){
+
+heading = event.webkitCompassHeading
+
+}else if(event.alpha !== null){
+
+heading = 360 - event.alpha
+
+}
+
+if(heading !== undefined){
+
+northArrow.style.transform = `rotate(${-heading}deg)`
+
+}
+
+},true)
 
 
 /* SERVICE WORKER */
