@@ -110,8 +110,8 @@ margin-bottom:8px;
 .camera-shell{
 position:relative;
 width:100%;
-height:55vh;
-min-height:320px;
+height:68vh;
+min-height:420px;
 border-radius:20px;
 border:1px solid var(--line);
 background:black;
@@ -227,8 +227,8 @@ grid-template-columns:1fr;
 grid-template-columns:1fr;
 }
 .camera-shell{
-height:50vh;
-min-height:280px;
+height:62vh;
+min-height:360px;
 }
 }
 </style>
@@ -292,7 +292,6 @@ Built by <b>InTandem ToolWorks</b><br>
 </div>
 
 <script>
-/* ELEMENTS */
 const startBtn = document.getElementById("startScan");
 const identifyBtn = document.getElementById("identifyBtn");
 const polarisBtn = document.getElementById("polarisBtn");
@@ -301,7 +300,6 @@ const cameraView = document.getElementById("cameraView");
 const cameraPlaceholder = document.getElementById("cameraPlaceholder");
 const arrow = document.getElementById("northArrow");
 
-/* SKY GRID */
 const grid = document.getElementById("skyGrid");
 const ctx = grid.getContext("2d");
 
@@ -310,8 +308,8 @@ function drawGrid() {
   grid.height = grid.offsetHeight;
 
   ctx.clearRect(0, 0, grid.width, grid.height);
-  ctx.strokeStyle = "rgba(255,255,255,0.15)";
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(141,211,255,0.30)";
+  ctx.lineWidth = 1.5;
 
   for (let i = 1; i < 6; i++) {
     const x = grid.width * (i / 6);
@@ -328,12 +326,24 @@ function drawGrid() {
     ctx.lineTo(grid.width, y);
     ctx.stroke();
   }
+
+  ctx.strokeStyle = "rgba(255,217,138,0.22)";
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(grid.width / 2, 0);
+  ctx.lineTo(grid.width / 2, grid.height);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(0, grid.height / 2);
+  ctx.lineTo(grid.width, grid.height / 2);
+  ctx.stroke();
 }
 
 drawGrid();
 window.addEventListener("resize", drawGrid);
 
-/* TRUE NORTH */
 function handleOrientation(event) {
   let heading;
 
@@ -369,7 +379,6 @@ function enableOrientationTracking() {
   }
 }
 
-/* CAMERA */
 startBtn.onclick = async () => {
   try {
     enableOrientationTracking();
@@ -391,6 +400,7 @@ startBtn.onclick = async () => {
     video.setAttribute("playsinline", "true");
 
     cameraView.appendChild(video);
+    drawGrid();
 
     if (cameraPlaceholder) {
       cameraPlaceholder.style.display = "none";
@@ -406,7 +416,6 @@ startBtn.onclick = async () => {
   }
 };
 
-/* CONSTELLATION SCAN */
 identifyBtn.onclick = () => {
   document.getElementById("constellationStatus").innerText = "Scanning...";
 
@@ -416,14 +425,12 @@ identifyBtn.onclick = () => {
   }, 1200);
 };
 
-/* POLARIS */
 polarisBtn.onclick = () => {
   document.getElementById("northStatus").innerText = "Celestial North Locked";
   arrow.style.color = "#8ff0b0";
   arrow.style.textShadow = "0 0 12px rgba(143,240,176,.9)";
 };
 
-/* GNSS */
 compareBtn.onclick = () => {
   if (!navigator.geolocation) {
     document.getElementById("gnssCompare").innerText = "Unavailable";
@@ -440,7 +447,6 @@ compareBtn.onclick = () => {
   );
 };
 
-/* SERVICE WORKER */
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
