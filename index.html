@@ -16,6 +16,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 
+<script defer src="app.js"></script>
+
 <style>
 :root{
 --card:rgba(20,32,51,.85);
@@ -344,7 +346,7 @@ min-height:360px;
 </div>
 
 <div class="note">
-Use the sky as a celestial reference. This build supports celestial north, constellation matching, and estimated reference outputs. Time and location results remain rough correction estimates until deeper star and moon solving is added.
+Use the sky as a celestial reference. This build keeps constellation identification and celestial north active while adding correction workflows for time-from-sky and location-from-sky modes.
 </div>
 </div>
 
@@ -362,7 +364,7 @@ Use the sky as a celestial reference. This build supports celestial north, const
 <div class="kv"><span>Input Reference</span><span id="inputStatus" class="value-muted">No reference entered</span></div>
 
 <div class="note">
-This version is intended as a celestial correction instrument. It keeps constellation ID and north reference active while adding reference modes for time-from-sky and location-from-sky workflows.
+This version is a celestial reference instrument. It does not yet perform full optical moon/star solving from the camera image, but it now has the proper structure and data model for that next step.
 </div>
 </div>
 
@@ -374,229 +376,6 @@ Built by <b>InTandem ToolWorks</b><br>
 </div>
 
 </div>
-
-<script>
-const startBtn = document.getElementById("startScan");
-const identifyBtn = document.getElementById("identifyBtn");
-const polarisBtn = document.getElementById("polarisBtn");
-const solveBtn = document.getElementById("solveBtn");
-
-const solveMode = document.getElementById("solveMode");
-const zipInput = document.getElementById("zipInput");
-const latInput = document.getElementById("latInput");
-const lonInput = document.getElementById("lonInput");
-const knownTimeInput = document.getElementById("knownTimeInput");
-const dateInput = document.getElementById("dateInput");
-
-const cameraView = document.getElementById("cameraView");
-const cameraPlaceholder = document.getElementById("cameraPlaceholder");
-const arrow = document.getElementById("northArrow");
-
-const grid = document.getElementById("skyGrid");
-const ctx = grid.getContext("2d");
-
-dateInput.value = new Date().toISOString().slice(0,10);
-
-function setValue(id, text, className = "") {
-  const el = document.getElementById(id);
-  el.innerText = text;
-  el.className = className;
-}
-
-function drawGrid() {
-  grid.width = grid.offsetWidth;
-  grid.height = grid.offsetHeight;
-
-  ctx.clearRect(0, 0, grid.width, grid.height);
-  ctx.strokeStyle = "rgba(141,211,255,0.30)";
-  ctx.lineWidth = 1.5;
-
-  for (let i = 1; i < 6; i++) {
-    const x = grid.width * (i / 6);
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, grid.height);
-    ctx.stroke();
-  }
-
-  for (let i = 1; i < 4; i++) {
-    const y = grid.height * (i / 4);
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(grid.width, y);
-    ctx.stroke();
-  }
-
-  ctx.strokeStyle = "rgba(255,217,138,0.22)";
-  ctx.lineWidth = 2;
-
-  ctx.beginPath();
-  ctx.moveTo(grid.width / 2, 0);
-  ctx.lineTo(grid.width / 2, grid.height);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(0, grid.height / 2);
-  ctx.lineTo(grid.width, grid.height / 2);
-  ctx.stroke();
-}
-
-drawGrid();
-window.addEventListener("resize", drawGrid);
-
-function handleOrientation(event) {
-  let heading;
-
-  if (typeof event.webkitCompassHeading === "number") {
-    heading = event.webkitCompassHeading;
-  } else if (event.alpha !== null) {
-    heading = 360 - event.alpha;
-  }
-
-  if (heading !== undefined) {
-    arrow.style.transform = `rotate(${-heading}deg)`;
-  }
-}
-
-function enableOrientationTracking() {
-  if (
-    typeof DeviceOrientationEvent !== "undefined" &&
-    typeof DeviceOrientationEvent.requestPermission === "function"
-  ) {
-    DeviceOrientationEvent.requestPermission()
-      .then(permissionState => {
-        if (permissionState === "granted") {
-          window.addEventListener("deviceorientation", handleOrientation, true);
-        } else {
-          setValue("modeStatus", "Motion Denied", "value-danger");
-        }
-      })
-      .catch(() => {
-        setValue("modeStatus", "Motion Error", "value-danger");
-      });
-  } else {
-    window.addEventListener("deviceorientation", handleOrientation, true);
-  }
-}
-
-solveMode.addEventListener("change", () => {
-  const label = solveMode.options[solveMode.selectedIndex].text;
-  setValue("solveModeStatus", label, "value-muted");
-});
-
-function summarizeInputs() {
-  const zip = zipInput.value.trim();
-  const lat = latInput.value.trim();
-  const lon = lonInput.value.trim();
-  const knownTime = knownTimeInput.value.trim();
-
-  if (zip) return `ZIP ${zip}`;
-  if (lat && lon) return `${lat}, ${lon}`;
-  if (knownTime) return `Known time ${knownTime}`;
-  return "No reference entered";
-}
-
-startBtn.onclick = async () => {
-  try {
-    enableOrientationTracking();
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
-      audio: false
-    });
-
-    const existingVideo = cameraView.querySelector("video");
-    if (existingVideo) existingVideo.remove();
-
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    video.autoplay = true;
-    video.playsInline = true;
-    video.setAttribute("playsinline", "true");
-
-    cameraView.appendChild(video);
-    drawGrid();
-
-    if (cameraPlaceholder) cameraPlaceholder.style.display = "none";
-
-    setValue("modeStatus", "Sky Scan Active", "value-good");
-    setValue("inputStatus", summarizeInputs(), "value-muted");
-  } catch (err) {
-    if (cameraPlaceholder) cameraPlaceholder.innerText = "Camera permission required";
-    setValue("modeStatus", "Camera Blocked", "value-danger");
-    console.log("Camera error:", err);
-  }
-};
-
-identifyBtn.onclick = () => {
-  setValue("constellationStatus", "Scanning...", "value-warn");
-
-  setTimeout(() => {
-    setValue("constellationStatus", "Ursa Major / Cassiopeia", "value-good");
-    setValue("confidence", "78%", "value-good");
-  }, 1200);
-};
-
-polarisBtn.onclick = () => {
-  setValue("polarisStatus", "Locked", "value-good");
-  setValue("northStatus", "Celestial North Locked", "value-good");
-  arrow.style.color = "#8ff0b0";
-  arrow.style.textShadow = "0 0 12px rgba(143,240,176,.9)";
-};
-
-solveBtn.onclick = () => {
-  const mode = solveMode.value;
-  const zip = zipInput.value.trim();
-  const lat = latInput.value.trim();
-  const lon = lonInput.value.trim();
-  const knownTime = knownTimeInput.value.trim();
-  const dateVal = dateInput.value.trim();
-
-  setValue("inputStatus", summarizeInputs(), "value-muted");
-
-  if (mode === "timeFromSky") {
-    if (!(zip || (lat && lon))) {
-      setValue("skyTimeStatus", "Need ZIP or lat/lon", "value-danger");
-      setValue("locationStatus", "Reference location required", "value-muted");
-      return;
-    }
-
-    setValue("skyTimeStatus", "Estimating from sky reference...", "value-warn");
-    setValue("locationStatus", zip ? `Using ZIP ${zip}` : `Using ${lat}, ${lon}`, "value-muted");
-
-    setTimeout(() => {
-      setValue("skyTimeStatus", "Approx 9:43 PM", "value-good");
-      setValue("confidence", "62%", "value-warn");
-    }, 1300);
-  }
-
-  if (mode === "locationFromSky") {
-    if (!knownTime) {
-      setValue("locationStatus", "Need known time", "value-danger");
-      setValue("skyTimeStatus", "Using known time reference", "value-muted");
-      return;
-    }
-
-    setValue("skyTimeStatus", `Known time ${knownTime}`, "value-muted");
-    setValue("locationStatus", "Estimating from sky reference...", "value-warn");
-
-    setTimeout(() => {
-      setValue("locationStatus", "Approx 39°N / western longitude band", "value-good");
-      setValue("confidence", "48%", "value-warn");
-    }, 1300);
-  }
-
-  if (mode === "referenceOnly") {
-    setValue("skyTimeStatus", "Reference only mode", "value-muted");
-    setValue("locationStatus", dateVal ? `Date ${dateVal}` : "Reference only", "value-muted");
-    setValue("confidence", "35%", "value-warn");
-  }
-};
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
 
 </body>
 </html>
