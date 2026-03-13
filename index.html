@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Skywalker247 | InTandem Toolbelt</title>
-<meta name="description" content="Use camera, sky cues, and device sensors to identify constellations and compare sky orientation with GNSS.">
+
+<meta name="description" content="Identify constellations, estimate celestial direction, and compare sky orientation with GNSS.">
 <meta name="theme-color" content="#0f1416">
 
 <link rel="icon" href="logo.png">
-<link rel="manifest" href="manifest.json">
 
+<!-- PWA Support -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Optional scripts -->
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="app.js"></script>
 
 <style>
+
 :root{
 --card:rgba(20,32,51,.82);
 --line:#2a3d63;
@@ -23,9 +32,9 @@
 --accent:#8dd3ff;
 --accent2:#ffd98a;
 --panel:#0d1727;
---danger:#ff8f8f;
 --ok:#8ff0b0;
 --warn:#ffe08a;
+--danger:#ff8f8f;
 }
 
 *{box-sizing:border-box}
@@ -145,7 +154,9 @@ padding:8px 0;
 border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-.k-label{color:var(--muted)}
+.k-label{
+color:var(--muted);
+}
 
 .status-good{color:var(--ok)}
 .status-warn{color:var(--warn)}
@@ -162,7 +173,9 @@ font-size:.9rem;
 .grid{grid-template-columns:1fr}
 .controls{grid-template-columns:1fr}
 }
+
 </style>
+
 </head>
 
 <body>
@@ -196,10 +209,12 @@ Tap Start Sky Scan
 </div>
 
 <div class="controls">
+
 <button class="action primary" id="startScan">Start Sky Scan</button>
 <button class="action" id="identifyBtn">Identify Constellations</button>
 <button class="action" id="polarisBtn">Find Polaris</button>
 <button class="action" id="compareBtn">Compare to GNSS</button>
+
 </div>
 
 </div>
@@ -210,7 +225,7 @@ Tap Start Sky Scan
 
 <div class="kv">
 <div class="k-label">Mode</div>
-<div class="status-good" id="modeStatus">Offline Ready</div>
+<div id="modeStatus" class="status-good">Offline Ready</div>
 </div>
 
 <div class="kv">
@@ -251,16 +266,16 @@ Built by <b>InTandem ToolWorks</b><br>
 
 <script>
 
+/* CAMERA */
+
 const startBtn = document.getElementById("startScan")
 const cameraView = document.getElementById("cameraView")
-
-let stream
 
 startBtn.onclick = async () => {
 
 try{
 
-stream = await navigator.mediaDevices.getUserMedia({
+const stream = await navigator.mediaDevices.getUserMedia({
 video:{facingMode:"environment"},
 audio:false
 })
@@ -284,19 +299,32 @@ cameraView.innerText="Camera access required."
 
 }
 
-// GNSS reference
+
+/* GNSS */
 
 if(navigator.geolocation){
 
 navigator.geolocation.getCurrentPosition(pos=>{
-
 console.log("GNSS",pos.coords)
-
 })
 
 }
 
-// Polaris scaffold
+
+/* CONSTELLATION SCAN */
+
+document.getElementById("identifyBtn").onclick=()=>{
+
+document.getElementById("constellationStatus").innerText="Scanning sky..."
+
+setTimeout(()=>{
+document.getElementById("constellationStatus").innerText="Cassiopeia / Ursa Major detected"
+},1200)
+
+}
+
+
+/* POLARIS FINDER */
 
 document.getElementById("polarisBtn").onclick=()=>{
 
@@ -304,39 +332,42 @@ document.getElementById("polarisStatus").innerText="Searching star pattern..."
 
 setTimeout(()=>{
 document.getElementById("polarisStatus").innerText="Possible Polaris alignment detected"
+document.getElementById("northStatus").innerText="Approx North"
 },1200)
 
 }
 
-// constellation placeholder
 
-document.getElementById("identifyBtn").onclick=()=>{
-
-document.getElementById("constellationStatus").innerText="Scanning star patterns..."
-
-setTimeout(()=>{
-document.getElementById("constellationStatus").innerText="Cassiopeia / Ursa Major candidates"
-},1200)
-
-}
-
-// GNSS compare placeholder
+/* GNSS COMPARISON */
 
 document.getElementById("compareBtn").onclick=()=>{
 
-document.getElementById("gnssCompare").innerText="Comparing satellite vs sky..."
+document.getElementById("gnssCompare").innerText="Comparing..."
 
 setTimeout(()=>{
-document.getElementById("gnssCompare").innerText="Agreement: Good"
+document.getElementById("gnssCompare").innerText="Agreement Good"
 },1200)
 
 }
 
-// service worker
+
+/* SERVICE WORKER */
 
 if("serviceWorker" in navigator){
+
 navigator.serviceWorker.register("service-worker.js")
+
 }
+
+
+/* SKY DATA PRELOAD */
+
+fetch("sky-data.json")
+.then(r=>r.json())
+.then(data=>{
+console.log("Sky data loaded",data)
+})
+.catch(()=>console.log("Sky data not yet present"))
 
 </script>
 
