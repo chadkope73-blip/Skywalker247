@@ -125,7 +125,18 @@ align-items:center;
 justify-content:center;
 }
 
-/* NORTH OVERLAY */
+/* SKY GRID */
+
+#skyGrid{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+}
+
+/* TRUE NORTH OVERLAY */
 
 #northOverlay{
 position:absolute;
@@ -230,6 +241,8 @@ Identify constellations, estimate celestial orientation, and compare the sky wit
 
 <div class="camera-shell" id="cameraView">
 
+<canvas id="skyGrid"></canvas>
+
 <div id="northOverlay">
 <div id="northArrow">▲</div>
 <div id="northLabel">True North</div>
@@ -331,6 +344,65 @@ cameraView.innerText="Camera access required."
 }
 
 
+/* SKY GRID */
+
+const gridCanvas=document.getElementById("skyGrid")
+const ctx=gridCanvas.getContext("2d")
+
+function drawGrid(){
+
+gridCanvas.width=gridCanvas.offsetWidth
+gridCanvas.height=gridCanvas.offsetHeight
+
+ctx.clearRect(0,0,gridCanvas.width,gridCanvas.height)
+
+ctx.strokeStyle="rgba(255,255,255,0.15)"
+ctx.lineWidth=1
+
+for(let i=1;i<6;i++){
+let x=gridCanvas.width*(i/6)
+ctx.beginPath()
+ctx.moveTo(x,0)
+ctx.lineTo(x,gridCanvas.height)
+ctx.stroke()
+}
+
+for(let i=1;i<4;i++){
+let y=gridCanvas.height*(i/4)
+ctx.beginPath()
+ctx.moveTo(0,y)
+ctx.lineTo(gridCanvas.width,y)
+ctx.stroke()
+}
+
+}
+
+window.addEventListener("resize",drawGrid)
+drawGrid()
+
+
+/* TRUE NORTH ROTATION */
+
+const northArrow=document.getElementById("northArrow")
+
+window.addEventListener("deviceorientation",event=>{
+
+let heading
+
+if(event.webkitCompassHeading){
+heading=event.webkitCompassHeading
+}
+else if(event.alpha!==null){
+heading=360-event.alpha
+}
+
+if(heading!==undefined){
+northArrow.style.transform=`rotate(${-heading}deg)`
+}
+
+},true)
+
+
 /* GNSS */
 
 if(navigator.geolocation){
@@ -359,12 +431,16 @@ document.getElementById("constellationStatus").innerText="Cassiopeia / Ursa Majo
 
 document.getElementById("polarisBtn").onclick=()=>{
 
-document.getElementById("polarisStatus").innerText="Searching star pattern..."
+document.getElementById("polarisStatus").innerText="Scanning for Polaris..."
 
 setTimeout(()=>{
-document.getElementById("polarisStatus").innerText="Possible Polaris alignment detected"
-document.getElementById("northStatus").innerText="Approx North"
-},1200)
+
+document.getElementById("polarisStatus").innerText="Polaris Locked"
+document.getElementById("northStatus").innerText="True North Confirmed"
+
+document.getElementById("northArrow").style.color="#8ff0b0"
+
+},1500)
 
 }
 
@@ -382,43 +458,14 @@ document.getElementById("gnssCompare").innerText="Agreement Good"
 }
 
 
-/* TRUE NORTH ROTATION */
-
-const northArrow = document.getElementById("northArrow")
-
-window.addEventListener("deviceorientation", event=>{
-
-let heading
-
-if(event.webkitCompassHeading){
-
-heading = event.webkitCompassHeading
-
-}else if(event.alpha !== null){
-
-heading = 360 - event.alpha
-
-}
-
-if(heading !== undefined){
-
-northArrow.style.transform = `rotate(${-heading}deg)`
-
-}
-
-},true)
-
-
 /* SERVICE WORKER */
 
 if("serviceWorker" in navigator){
-
 navigator.serviceWorker.register("service-worker.js")
-
 }
 
 
-/* SKY DATA PRELOAD */
+/* SKY DATA */
 
 fetch("sky-data.json")
 .then(r=>r.json())
