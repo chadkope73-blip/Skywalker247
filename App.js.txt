@@ -1,0 +1,65 @@
+// Skywalker247 basic camera + GNSS starter
+
+const startButton = document.querySelector(".action.primary");
+
+let videoStream;
+
+async function startCamera(){
+
+try{
+
+const stream = await navigator.mediaDevices.getUserMedia({
+video:{
+facingMode:"environment"
+},
+audio:false
+});
+
+videoStream = stream;
+
+const video = document.createElement("video");
+video.srcObject = stream;
+video.autoplay = true;
+video.playsInline = true;
+
+const container = document.querySelector(".camera-shell");
+container.innerHTML = "";
+container.appendChild(video);
+
+} catch(err){
+
+console.log("Camera error:",err);
+alert("Camera access is required for Skywalker247.");
+
+}
+
+}
+
+startButton.addEventListener("click",startCamera);
+
+
+// GNSS reference
+
+function getLocation(){
+
+if(!navigator.geolocation) return;
+
+navigator.geolocation.getCurrentPosition(position=>{
+
+console.log("GNSS:",position.coords);
+
+});
+
+}
+
+getLocation();
+
+
+// register service worker
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("service-worker.js")
+.then(()=>console.log("Service Worker Registered"));
+
+}
