@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Skywalker247 | InTandem Toolbelt</title>
+<meta name="description" content="Use camera, sky cues, and device sensors to identify constellations, estimate celestial direction, and compare against GNSS.">
+<meta name="theme-color" content="#0f1416">
+
+<link rel="icon" href="logo.png">
+<script defer src="/_vercel/insights/script.js"></script>
+
+<style>
+:root{
+--bg1:#0b1220;
+--bg2:#13233f;
+--card:rgba(20,32,51,.82);
+--line:#2a3d63;
+--text:#e8eefc;
+--muted:#a9b7d3;
+--accent:#8dd3ff;
+--accent2:#ffd98a;
+--panel:#0d1727;
+--danger:#ff8f8f;
+--ok:#8ff0b0;
+--warn:#ffe08a;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+margin:0;
+padding:0;
+min-height:100%;
+font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+color:var(--text);
+background:
+linear-gradient(rgba(11,18,32,.48),rgba(11,18,32,.60)),
+url("/topo-bg.jpg");
+background-size:cover;
+background-position:center;
+background-attachment:fixed;
+}
+
+body{
+padding:20px;
+}
+
+.container{
+max-width:980px;
+margin:0 auto;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+margin-bottom:16px;
+flex-wrap:wrap;
+}
+
+.back-btn{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:10px 14px;
+border-radius:12px;
+border:1px solid var(--line);
+background:rgba(20,32,51,.85);
+backdrop-filter:blur(10px);
+color:var(--accent2);
+text-decoration:none;
+font-weight:700;
+box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+
+.back-btn:hover{
+filter:brightness(1.05);
+}
+
+.brand-mini{
+display:flex;
+align-items:center;
+gap:10px;
+color:var(--muted);
+font-size:.92rem;
+}
+
+.brand-mini img{
+width:38px;
+height:auto;
+filter:drop-shadow(0 5px 10px rgba(0,0,0,.35));
+}
+
+.hero{
+border:1px solid var(--line);
+border-radius:28px;
+padding:26px;
+margin-bottom:18px;
+background:rgba(20,32,51,.85);
+backdrop-filter:blur(10px);
+box-shadow:0 16px 40px rgba(0,0,0,.25);
+text-align:center;
+}
+
+.logo{
+margin-bottom:14px;
+}
+
+.logo img{
+width:120px;
+height:auto;
+filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+
+h1{
+margin:8px 0 6px;
+font-size:2rem;
+color:var(--accent2);
+}
+
+.subtitle{
+color:var(--muted);
+max-width:720px;
+margin:auto;
+line-height:1.5;
+}
+
+.badges{
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin-top:16px;
+}
+
+.badge{
+border:1px solid var(--line);
+background:var(--panel);
+border-radius:999px;
+padding:8px 12px;
+font-size:.84rem;
+color:var(--muted);
+}
+
+.grid{
+display:grid;
+grid-template-columns:1.35fr .9fr;
+gap:16px;
+}
+
+.card{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:22px;
+padding:18px;
+backdrop-filter:blur(8px);
+box-shadow:0 16px 40px rgba(0,0,0,.18);
+}
+
+.section-title{
+color:var(--accent2);
+margin-bottom:10px;
+font-weight:700;
+font-size:1rem;
+}
+
+.camera-shell{
+position:relative;
+width:100%;
+aspect-ratio:16/10;
+border-radius:20px;
+border:1px solid var(--line);
+overflow:hidden;
+background:
+radial-gradient(circle at 30% 25%, rgba(141,211,255,.12), transparent 20%),
+radial-gradient(circle at 70% 35%, rgba(255,217,138,.10), transparent 18%),
+linear-gradient(180deg, #050b15 0%, #0b1220 100%);
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+
+.sky-overlay{
+position:absolute;
+inset:0;
+pointer-events:none;
+}
+
+.star{
+position:absolute;
+width:4px;
+height:4px;
+border-radius:50%;
+background:#fff;
+opacity:.9;
+box-shadow:0 0 10px rgba(255,255,255,.45);
+}
+
+.constellation-label{
+position:absolute;
+padding:4px 8px;
+border-radius:10px;
+background:rgba(13,23,39,.82);
+border:1px solid var(--line);
+color:var(--accent);
+font-size:.78rem;
+font-weight:700;
+backdrop-filter:blur(6px);
+}
+
+.camera-center{
+position:absolute;
+top:50%;
+left:50%;
+width:44px;
+height:44px;
+margin-left:-22px;
+margin-top:-22px;
+border:1px solid rgba(141,211,255,.65);
+border-radius:50%;
+box-shadow:0 0 0 9999px rgba(0,0,0,.06);
+}
+
+.camera-center:before,
+.camera-center:after{
+content:"";
+position:absolute;
+background:rgba(141,211,255,.65);
+}
+
+.camera-center:before{
+width:16px;
+height:1px;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+}
+
+.camera-center:after{
+width:1px;
+height:16px;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+}
+
+.overlay-info{
+position:absolute;
+left:12px;
+right:12px;
+bottom:12px;
+display:flex;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.overlay-chip{
+border:1px solid var(--line);
+border-radius:12px;
+padding:8px 10px;
+font-size:.8rem;
+background:rgba(13,23,39,.85);
+color:var(--text);
+backdrop-filter:blur(8px);
+}
+
+.controls{
+display:grid;
+grid-template-columns:repeat(2, 1fr);
+gap:12px;
+margin-top:14px;
+}
+
+.action{
+padding:12px 14px;
+border-radius:14px;
+border:1px solid var(--line);
+background:var(--panel);
+color:var(--text);
+font-weight:700;
+cursor:pointer;
+text-align:center;
+}
+
+.action.primary{
+background:linear-gradient(180deg,var(--accent),#67b8f6);
+color:#07111f;
+border:none;
+box-shadow:0 10px 24px rgba(103,184,246,.22);
+}
+
+.action:hover{
+filter:brightness(1.05);
+}
+
+.kv{
+display:grid;
+grid-template-columns:1fr auto;
+gap:10px;
+padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.kv:last-child{
+border-bottom:none;
+padding-bottom:0;
+}
+
+.k-label{
+color:var(--muted);
+font-size:.92rem;
+}
+
+.k-value{
+font-weight:700;
+text-align:right;
+}
+
+.status-good{color:var(--ok)}
+.status-warn{color:var(--warn)}
+.status-bad{color:var(--danger)}
+
+.list{
+display:grid;
+gap:10px;
+margin-top:8px;
+}
+
+.item{
+border:1px solid var(--line);
+border-radius:16px;
+padding:13px 14px;
+background:var(--panel);
+}
+
+.item-title{
+font-weight:700;
+margin-bottom:4px;
+}
+
+.item-desc{
+font-size:.88rem;
+color:var(--muted);
+line-height:1.4;
+}
+
+.footer{
+margin-top:20px;
+font-size:.9rem;
+color:var(--muted);
+text-align:center;
+line-height:1.6;
+}
+
+.footer a{
+color:var(--accent2);
+text-decoration:none;
+}
+
+.footer a:hover{
+text-decoration:underline;
+}
+
+@media(max-width:860px){
+.grid{
+grid-template-columns:1fr;
+}
+}
+
+@media(max-width:640px){
+body{
+padding:14px;
+}
+.hero{
+padding:22px 16px;
+}
+.controls{
+grid-template-columns:1fr;
+}
+h1{
+font-size:1.8rem;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+<a class="back-btn" href="https://navgenie.ittworks.com">← Back to Navgenie</a>
+<div class="brand-mini">
+<img src="logo.png" alt="InTandem ToolWorks">
+<span>InTandem ToolWorks · Field Toolbelt</span>
+</div>
+</div>
+
+<section class="hero">
+<div class="logo">
+<img src="logo.png" alt="InTandem ToolWorks">
+</div>
+
+<h1>Skywalker247</h1>
+<p class="subtitle">
+Use the sky as a field reference. Identify constellations, estimate celestial direction,
+and compare the sky against GNSS for a smarter situational check.
+</p>
+
+<div class="badges">
+<div class="badge">Offline-Ready Design</div>
+<div class="badge">Constellation Labels</div>
+<div class="badge">Celestial Direction Check</div>
+<div class="badge">GNSS Cross-Reference</div>
+</div>
+</section>
+
+<div class="grid">
+
+<div class="card">
+<div class="section-title">Sky View</div>
+
+<div class="camera-shell" aria-label="Skywalker247 preview area">
+<div class="sky-overlay">
+<div class="star" style="top:16%;left:18%;"></div>
+<div class="star" style="top:20%;left:25%;"></div>
+<div class="star" style="top:23%;left:31%;"></div>
+<div class="star" style="top:28%;left:22%;"></div>
+
+<div class="star" style="top:32%;left:68%;"></div>
+<div class="star" style="top:27%;left:74%;"></div>
+<div class="star" style="top:22%;left:79%;"></div>
+<div class="star" style="top:18%;left:85%;"></div>
+
+<div class="star" style="top:58%;left:52%;width:5px;height:5px;"></div>
+<div class="star" style="top:62%;left:57%;"></div>
+<div class="star" style="top:67%;left:62%;"></div>
+
+<div class="constellation-label" style="top:14%;left:20%;">Cassiopeia</div>
+<div class="constellation-label" style="top:17%;left:70%;">Ursa Major</div>
+<div class="constellation-label" style="top:54%;left:54%;">Orion</div>
+
+<div class="camera-center"></div>
+
+<div class="overlay-info">
+<div class="overlay-chip">Sky Match: Medium</div>
+<div class="overlay-chip">Visible Labels: 3</div>
+<div class="overlay-chip">Offline Almanac: Ready</div>
+</div>
+</div>
+</div>
+
+<div class="controls">
+<button class="action primary" type="button">Start Sky Scan</button>
+<button class="action" type="button">Identify Constellations</button>
+<button class="action" type="button">Compare to GNSS</button>
+<button class="action" type="button">Funny Horoscope</button>
+</div>
+</div>
+
+<div class="card">
+<div class="section-title">Status</div>
+
+<div class="kv">
+<div class="k-label">Mode</div>
+<div class="k-value status-good">Offline Ready</div>
+</div>
+
+<div class="kv">
+<div class="k-label">Constellation Match</div>
+<div class="k-value status-warn">Medium Confidence</div>
+</div>
+
+<div class="kv">
+<div class="k-label">True North Estimate</div>
+<div class="k-value">003°</div>
+</div>
+
+<div class="kv">
+<div class="k-label">Sky Time Estimate</div>
+<div class="k-value">10:14 PM ± 8m</div>
+</div>
+
+<div class="kv">
+<div class="k-label">GNSS Comparison</div>
+<div class="k-value status-good">Agreement Good</div>
+</div>
+
+<div class="kv">
+<div class="k-label">Best Camera Profile</div>
+<div class="k-value">Rear · Auto</div>
+</div>
+</div>
+
+<div class="card">
+<div class="section-title">Detected Constellations</div>
+<div class="list">
+<div class="item">
+<div class="item-title">Cassiopeia</div>
+<div class="item-desc">Useful for locating Polaris when the Big Dipper is low or obstructed.</div>
+</div>
+<div class="item">
+<div class="item-title">Ursa Major</div>
+<div class="item-desc">Use the outer bowl stars of the Big Dipper to help point toward Polaris.</div>
+</div>
+<div class="item">
+<div class="item-title">Orion</div>
+<div class="item-desc">Strong seasonal reference and easy to recognize with a clear belt pattern.</div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="section-title">Tool Notes</div>
+<div class="list">
+<div class="item">
+<div class="item-title">Camera Control</div>
+<div class="item-desc">Web app uses best-available rear camera behavior and supported exposure/focus settings.</div>
+</div>
+<div class="item">
+<div class="item-title">Offline Capability</div>
+<div class="item-desc">Designed to use cached assets, bundled sky data, and device sensors when internet is unavailable.</div>
+</div>
+<div class="item">
+<div class="item-title">Back Button Pattern</div>
+<div class="item-desc">Matches the suite navigation flow so users can return directly to Navgenie.</div>
+</div>
+</div>
+</div>
+
+<div class="footer">
+Built by <b>InTandem ToolWorks</b><br><br>
+<a href="mailto:support@ittworks.com">support@ittworks.com</a><br><br>
+<a href="https://www.facebook.com/InTandemToolworks" target="_blank">Follow us on Facebook</a>
+</div>
+
+</div>
+
+</body>
+</html>
