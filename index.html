@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -16,9 +15,9 @@
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 
 <style>
-
 :root{
 --card:rgba(20,32,51,.85);
 --line:#2a3d63;
@@ -28,7 +27,11 @@
 --accent2:#ffd98a;
 --panel:#0d1727;
 --ok:#8ff0b0;
+--warn:#ffe08a;
+--danger:#ff8f8f;
 }
+
+*{box-sizing:border-box}
 
 body{
 font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -37,9 +40,11 @@ linear-gradient(rgba(11,18,32,.5),rgba(11,18,32,.6)),
 url("/topo-bg.jpeg");
 background-size:cover;
 background-position:center;
+background-attachment:fixed;
 color:var(--text);
 margin:0;
 padding:20px;
+min-height:100vh;
 }
 
 .container{
@@ -72,6 +77,16 @@ text-align:center;
 width:110px;
 }
 
+h1{
+margin:10px 0 6px;
+color:var(--accent2);
+}
+
+.hero p{
+margin:0;
+color:var(--muted);
+}
+
 .grid{
 display:grid;
 grid-template-columns:1.4fr 1fr;
@@ -92,11 +107,11 @@ margin-bottom:8px;
 }
 
 /* CAMERA VIEWPORT */
-
 .camera-shell{
 position:relative;
 width:100%;
 height:55vh;
+min-height:320px;
 border-radius:20px;
 border:1px solid var(--line);
 background:black;
@@ -104,10 +119,10 @@ overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:center;
+color:var(--muted);
 }
 
 /* VIDEO LAYER */
-
 .camera-shell video{
 position:absolute;
 top:0;
@@ -119,9 +134,10 @@ z-index:1;
 }
 
 /* SKY GRID */
-
 #skyGrid{
 position:absolute;
+top:0;
+left:0;
 width:100%;
 height:100%;
 pointer-events:none;
@@ -129,7 +145,6 @@ z-index:2;
 }
 
 /* NORTH ARROW */
-
 #northOverlay{
 position:absolute;
 top:10px;
@@ -143,12 +158,15 @@ z-index:3;
 #northArrow{
 font-size:34px;
 color:#ffd98a;
-transition:transform .1s linear;
+transition:transform .1s linear, color .2s ease, text-shadow .2s ease;
+text-shadow:0 0 10px rgba(0,0,0,.7);
 }
 
 #northLabel{
 font-size:12px;
 color:#ffd98a;
+margin-top:2px;
+text-shadow:0 0 8px rgba(0,0,0,.7);
 }
 
 .controls{
@@ -176,18 +194,44 @@ color:black;
 .kv{
 display:flex;
 justify-content:space-between;
+gap:12px;
 padding:8px 0;
 border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.kv:last-child{
+border-bottom:none;
 }
 
 .footer{
 margin-top:20px;
 text-align:center;
 color:var(--muted);
+line-height:1.6;
 }
 
-</style>
+.footer a{
+color:var(--accent2);
+text-decoration:none;
+}
 
+.footer a:hover{
+text-decoration:underline;
+}
+
+@media(max-width:760px){
+.grid{
+grid-template-columns:1fr;
+}
+.controls{
+grid-template-columns:1fr;
+}
+.camera-shell{
+height:50vh;
+min-height:280px;
+}
+}
+</style>
 </head>
 
 <body>
@@ -197,24 +241,19 @@ color:var(--muted);
 <a class="back-btn" href="https://navgenie.ittworks.com">← Back to NavGenie</a>
 
 <section class="hero">
-
 <div class="logo">
-<img src="logo.png">
+<img src="logo.png" alt="InTandem ToolWorks">
 </div>
-
 <h1>Skywalker247</h1>
 <p>Celestial navigation and sky verification tool.</p>
-
 </section>
 
 <div class="grid">
 
 <div class="card">
-
 <div class="section-title">Sky View</div>
 
 <div class="camera-shell" id="cameraView">
-
 <canvas id="skyGrid"></canvas>
 
 <div id="northOverlay">
@@ -222,23 +261,18 @@ color:var(--muted);
 <div id="northLabel">True North</div>
 </div>
 
-Tap Start Sky Scan
-
+<div id="cameraPlaceholder">Tap Start Sky Scan</div>
 </div>
 
 <div class="controls">
-
 <button class="action primary" id="startScan">Start Sky Scan</button>
 <button class="action" id="identifyBtn">Identify Constellations</button>
 <button class="action" id="polarisBtn">Find Polaris</button>
 <button class="action" id="compareBtn">GNSS Compare</button>
-
 </div>
-
 </div>
 
 <div class="card">
-
 <div class="section-title">Status</div>
 
 <div class="kv"><span>Mode</span><span id="modeStatus">Offline Ready</span></div>
@@ -246,153 +280,170 @@ Tap Start Sky Scan
 <div class="kv"><span>Celestial North</span><span id="northStatus">—</span></div>
 <div class="kv"><span>Confidence</span><span id="confidence">0%</span></div>
 <div class="kv"><span>GNSS Drift</span><span id="gnssCompare">Waiting</span></div>
-
 </div>
 
 </div>
 
 <div class="footer">
 Built by <b>InTandem ToolWorks</b><br>
-support@ittworks.com
+<a href="mailto:support@ittworks.com">support@ittworks.com</a>
 </div>
 
 </div>
 
 <script>
-
-/* CAMERA */
-
-const startBtn=document.getElementById("startScan")
-const cameraView=document.getElementById("cameraView")
-
-startBtn.onclick=async()=>{
-
-try{
-
-const stream=await navigator.mediaDevices.getUserMedia({
-video:{facingMode:"environment"}
-})
-
-const video=document.createElement("video")
-
-video.srcObject=stream
-video.autoplay=true
-video.playsInline=true
-
-cameraView.appendChild(video)
-
-document.getElementById("modeStatus").innerText="Camera Active"
-
-}catch{
-
-cameraView.innerText="Camera permission required"
-
-}
-
-}
+/* ELEMENTS */
+const startBtn = document.getElementById("startScan");
+const identifyBtn = document.getElementById("identifyBtn");
+const polarisBtn = document.getElementById("polarisBtn");
+const compareBtn = document.getElementById("compareBtn");
+const cameraView = document.getElementById("cameraView");
+const cameraPlaceholder = document.getElementById("cameraPlaceholder");
+const arrow = document.getElementById("northArrow");
 
 /* SKY GRID */
+const grid = document.getElementById("skyGrid");
+const ctx = grid.getContext("2d");
 
-const grid=document.getElementById("skyGrid")
-const ctx=grid.getContext("2d")
+function drawGrid() {
+  grid.width = grid.offsetWidth;
+  grid.height = grid.offsetHeight;
 
-function drawGrid(){
+  ctx.clearRect(0, 0, grid.width, grid.height);
+  ctx.strokeStyle = "rgba(255,255,255,0.15)";
+  ctx.lineWidth = 1;
 
-grid.width=grid.offsetWidth
-grid.height=grid.offsetHeight
+  for (let i = 1; i < 6; i++) {
+    const x = grid.width * (i / 6);
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, grid.height);
+    ctx.stroke();
+  }
 
-ctx.strokeStyle="rgba(255,255,255,0.15)"
-
-for(let i=1;i<6;i++){
-
-let x=grid.width*(i/6)
-
-ctx.beginPath()
-ctx.moveTo(x,0)
-ctx.lineTo(x,grid.height)
-ctx.stroke()
-
+  for (let i = 1; i < 4; i++) {
+    const y = grid.height * (i / 4);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(grid.width, y);
+    ctx.stroke();
+  }
 }
 
-for(let i=1;i<4;i++){
-
-let y=grid.height*(i/4)
-
-ctx.beginPath()
-ctx.moveTo(0,y)
-ctx.lineTo(grid.width,y)
-ctx.stroke()
-
-}
-
-}
-
-drawGrid()
+drawGrid();
+window.addEventListener("resize", drawGrid);
 
 /* TRUE NORTH */
+function handleOrientation(event) {
+  let heading;
 
-const arrow=document.getElementById("northArrow")
+  if (typeof event.webkitCompassHeading === "number") {
+    heading = event.webkitCompassHeading;
+  } else if (event.alpha !== null) {
+    heading = 360 - event.alpha;
+  }
 
-window.addEventListener("deviceorientation",event=>{
-
-let heading
-
-if(event.webkitCompassHeading){
-heading=event.webkitCompassHeading
-}
-else if(event.alpha!==null){
-heading=360-event.alpha
-}
-
-if(heading!==undefined){
-arrow.style.transform=`rotate(${-heading}deg)`
+  if (heading !== undefined) {
+    arrow.style.transform = `rotate(${-heading}deg)`;
+  }
 }
 
-})
+function enableOrientationTracking() {
+  if (
+    typeof DeviceOrientationEvent !== "undefined" &&
+    typeof DeviceOrientationEvent.requestPermission === "function"
+  ) {
+    DeviceOrientationEvent.requestPermission()
+      .then(permissionState => {
+        if (permissionState === "granted") {
+          window.addEventListener("deviceorientation", handleOrientation, true);
+        } else {
+          document.getElementById("modeStatus").innerText = "Motion Denied";
+        }
+      })
+      .catch(() => {
+        document.getElementById("modeStatus").innerText = "Motion Error";
+      });
+  } else {
+    window.addEventListener("deviceorientation", handleOrientation, true);
+  }
+}
+
+/* CAMERA */
+startBtn.onclick = async () => {
+  try {
+    enableOrientationTracking();
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false
+    });
+
+    const existingVideo = cameraView.querySelector("video");
+    if (existingVideo) {
+      existingVideo.remove();
+    }
+
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "true");
+
+    cameraView.appendChild(video);
+
+    if (cameraPlaceholder) {
+      cameraPlaceholder.style.display = "none";
+    }
+
+    document.getElementById("modeStatus").innerText = "Camera Active";
+  } catch (err) {
+    if (cameraPlaceholder) {
+      cameraPlaceholder.innerText = "Camera permission required";
+    }
+    document.getElementById("modeStatus").innerText = "Camera Blocked";
+    console.log("Camera error:", err);
+  }
+};
 
 /* CONSTELLATION SCAN */
+identifyBtn.onclick = () => {
+  document.getElementById("constellationStatus").innerText = "Scanning...";
 
-identifyBtn.onclick=()=>{
-
-document.getElementById("constellationStatus").innerText="Scanning..."
-
-setTimeout(()=>{
-document.getElementById("constellationStatus").innerText="Ursa Major / Cassiopeia"
-document.getElementById("confidence").innerText="78%"
-},1200)
-
-}
+  setTimeout(() => {
+    document.getElementById("constellationStatus").innerText = "Ursa Major / Cassiopeia";
+    document.getElementById("confidence").innerText = "78%";
+  }, 1200);
+};
 
 /* POLARIS */
-
-polarisBtn.onclick=()=>{
-
-document.getElementById("northStatus").innerText="Celestial North Locked"
-
-arrow.style.color="#8ff0b0"
-
-}
+polarisBtn.onclick = () => {
+  document.getElementById("northStatus").innerText = "Celestial North Locked";
+  arrow.style.color = "#8ff0b0";
+  arrow.style.textShadow = "0 0 12px rgba(143,240,176,.9)";
+};
 
 /* GNSS */
+compareBtn.onclick = () => {
+  if (!navigator.geolocation) {
+    document.getElementById("gnssCompare").innerText = "Unavailable";
+    return;
+  }
 
-compareBtn.onclick=()=>{
-
-navigator.geolocation.getCurrentPosition(()=>{
-
-document.getElementById("gnssCompare").innerText="Drift 3°"
-
-})
-
-}
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      document.getElementById("gnssCompare").innerText = "Drift 3°";
+    },
+    () => {
+      document.getElementById("gnssCompare").innerText = "Permission Needed";
+    }
+  );
+};
 
 /* SERVICE WORKER */
-
-if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("service-worker.js")
-
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
 }
-
 </script>
 
 </body>
