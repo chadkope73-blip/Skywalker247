@@ -17,8 +17,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<script defer src="/_vercel/insights/script.js"></script>
-
 <style>
 
 :root{
@@ -30,8 +28,6 @@
 --accent2:#ffd98a;
 --panel:#0d1727;
 --ok:#8ff0b0;
---warn:#ffe08a;
---danger:#ff8f8f;
 }
 
 body{
@@ -41,7 +37,6 @@ linear-gradient(rgba(11,18,32,.5),rgba(11,18,32,.6)),
 url("/topo-bg.jpeg");
 background-size:cover;
 background-position:center;
-background-attachment:fixed;
 color:var(--text);
 margin:0;
 padding:20px;
@@ -73,7 +68,9 @@ background:var(--card);
 text-align:center;
 }
 
-.logo img{width:110px;}
+.logo img{
+width:110px;
+}
 
 .grid{
 display:grid;
@@ -94,16 +91,30 @@ font-weight:bold;
 margin-bottom:8px;
 }
 
+/* CAMERA VIEWPORT */
+
 .camera-shell{
 position:relative;
-aspect-ratio:16/10;
+width:100%;
+height:55vh;
 border-radius:20px;
 border:1px solid var(--line);
 background:black;
+overflow:hidden;
 display:flex;
 align-items:center;
 justify-content:center;
-overflow:hidden;
+}
+
+/* VIDEO */
+
+.camera-shell video{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
 /* SKY GRID */
@@ -112,6 +123,7 @@ overflow:hidden;
 position:absolute;
 width:100%;
 height:100%;
+pointer-events:none;
 }
 
 /* NORTH ARROW */
@@ -122,6 +134,7 @@ top:10px;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
+pointer-events:none;
 }
 
 #northArrow{
@@ -133,13 +146,6 @@ transition:transform .1s linear;
 #northLabel{
 font-size:12px;
 color:#ffd98a;
-}
-
-/* FIELD MODE */
-
-.field-mode{
-background:#050708;
-color:#ff5555;
 }
 
 .controls{
@@ -194,7 +200,6 @@ color:var(--muted);
 </div>
 
 <h1>Skywalker247</h1>
-
 <p>Celestial navigation and sky verification tool.</p>
 
 </section>
@@ -224,7 +229,6 @@ Tap Start Sky Scan
 <button class="action" id="identifyBtn">Identify Constellations</button>
 <button class="action" id="polarisBtn">Find Polaris</button>
 <button class="action" id="compareBtn">GNSS Compare</button>
-<button class="action" id="nightModeBtn">Night Mode</button>
 
 </div>
 
@@ -237,10 +241,8 @@ Tap Start Sky Scan
 <div class="kv"><span>Mode</span><span id="modeStatus">Offline Ready</span></div>
 <div class="kv"><span>Constellations</span><span id="constellationStatus">Idle</span></div>
 <div class="kv"><span>Celestial North</span><span id="northStatus">—</span></div>
-<div class="kv"><span>Sky Confidence</span><span id="confidence">0%</span></div>
+<div class="kv"><span>Confidence</span><span id="confidence">0%</span></div>
 <div class="kv"><span>GNSS Drift</span><span id="gnssCompare">Waiting</span></div>
-<div class="kv"><span>Moon Time</span><span id="skyTime">—</span></div>
-<div class="kv"><span>Sky Brightness</span><span id="skyQuality">—</span></div>
 
 </div>
 
@@ -269,12 +271,11 @@ video:{facingMode:"environment"}
 })
 
 const video=document.createElement("video")
+
 video.srcObject=stream
 video.autoplay=true
 video.playsInline=true
-video.style.width="100%"
 
-cameraView.innerHTML=""
 cameraView.appendChild(video)
 
 document.getElementById("modeStatus").innerText="Camera Active"
@@ -353,10 +354,8 @@ identifyBtn.onclick=()=>{
 document.getElementById("constellationStatus").innerText="Scanning..."
 
 setTimeout(()=>{
-
 document.getElementById("constellationStatus").innerText="Ursa Major / Cassiopeia"
 document.getElementById("confidence").innerText="78%"
-
 },1200)
 
 }
@@ -380,14 +379,6 @@ navigator.geolocation.getCurrentPosition(()=>{
 document.getElementById("gnssCompare").innerText="Drift 3°"
 
 })
-
-}
-
-/* NIGHT MODE */
-
-nightModeBtn.onclick=()=>{
-
-document.body.classList.toggle("field-mode")
 
 }
 
